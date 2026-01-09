@@ -23,3 +23,5 @@ Hacker News, stores articles in SQLite, and allows saving favorites.
 ```bash
 git clone https://github.com/YOUR_USERNAME/tech-news-tracker.git
 cd tech-news-tracker
+uvicorn main:app --port 8001 - for backend
+streamlit run app.py - for frontend
