@@ -1,0 +1,33 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="fastapi" />
+          <option value="uvicorn" />
+          <option value="sqlalchemy" />
+          <option value="pydantic" />
+          <option value="pydantic-settings" />
+          <option value="python-jose" />
+          <option value="passlib" />
+          <option value="python-multipart" />
+          <option value="email-validator" />
+          <option value="requests" />
+          <option value="beautifulsoup4" />
+          <option value="html5lib" />
+          <option value="lxml" />
+          <option value="streamlit" />
+          <option value="plotly" />
+          <option value="matplotlib" />
+          <option value="seaborn" />
+          <option value="pandas" />
+          <option value="python-dotenv" />
+          <option value="pytest" />
+          <option value="pytest-asyncio" />
+          <option value="alembic" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
