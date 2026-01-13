@@ -28,7 +28,7 @@ def verify_key(key: str) -> bool:
     except requests.RequestException:
         return False
 
-# --- LOGIN SCREEN (vetëm kjo shfaqet derisa të futet key) ---
+
 if not st.session_state.authed:
     st.subheader("🔐 Enter API key to continue")
 
@@ -48,7 +48,7 @@ if not st.session_state.authed:
     st.caption(f"API Base: {BASE_URL}")
     st.stop()
 
-# --- APP (kjo shfaqet vetëm pasi je authed) ---
+
 api_key = st.session_state.api_key
 
 with st.sidebar:
