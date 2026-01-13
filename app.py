@@ -6,27 +6,72 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000/api")
-API_KEY = os.getenv("API_KEY", "")
+DEFAULT_API_KEY = os.getenv("API_KEY", "")
 
 st.set_page_config(page_title="Tech News Tracker", layout="wide")
 st.title("📰 Tech News Tracker (Hacker News)")
 
+# --- session state ---
+if "authed" not in st.session_state:
+    st.session_state.authed = False
+if "api_key" not in st.session_state:
+    st.session_state.api_key = DEFAULT_API_KEY
+
+def verify_key(key: str) -> bool:
+    try:
+        r = requests.get(
+            f"{BASE_URL}/auth/check",
+            headers={"X-API-Key": key},
+            timeout=10,
+        )
+        return r.ok
+    except requests.RequestException:
+        return False
+
+# --- LOGIN SCREEN (vetëm kjo shfaqet derisa të futet key) ---
+if not st.session_state.authed:
+    st.subheader("🔐 Enter API key to continue")
+
+    key_input = st.text_input("X-API-Key", value=st.session_state.api_key, type="password")
+
+    colA, colB = st.columns([1, 5])
+    with colA:
+        if st.button("Continue"):
+            if not key_input.strip():
+                st.error("Duhet të shkruash API key.")
+            elif verify_key(key_input.strip()):
+                st.session_state.api_key = key_input.strip()
+                st.session_state.authed = True
+                st.rerun()
+            else:
+                st.error("API key është gabim ose API nuk po përgjigjet.")
+    st.caption(f"API Base: {BASE_URL}")
+    st.stop()
+
+# --- APP (kjo shfaqet vetëm pasi je authed) ---
+api_key = st.session_state.api_key
+
 with st.sidebar:
     st.header("Settings")
     st.write("API Base:", BASE_URL)
-    api_key_input = st.text_input("X-API-Key", value=API_KEY, type="password")
+
     limit = st.slider("Scrape limit", min_value=5, max_value=100, value=30, step=5)
 
     if st.button("🔄 Refresh from Hacker News"):
         r = requests.post(
             f"{BASE_URL}/articles/refresh?limit={limit}",
-            headers={"X-API-Key": api_key_input},
+            headers={"X-API-Key": api_key},
             timeout=30,
         )
         if r.ok:
             st.success(r.json())
         else:
             st.error(f"{r.status_code}: {r.text}")
+
+    if st.button("🚪 Logout"):
+        st.session_state.authed = False
+        st.session_state.api_key = ""
+        st.rerun()
 
 st.subheader("Browse Articles")
 
@@ -58,11 +103,10 @@ st.caption(f"Total in DB: {data['total']}")
 for item in data["items"]:
     with st.container(border=True):
         left, right = st.columns([5, 1])
-        # left.markdown(f"**{item['title']}**")
-        # left.markdown(item["url"])
         left.markdown(f"### [{item['title']}]({item['url']})")
-
-        left.caption(f"Points: {item['points']} | Comments: {item['comments']} | Source: {item['source']}")
+        left.caption(
+            f"Points: {item['points']} | Comments: {item['comments']} | Source: {item['source']}"
+        )
 
         is_saved = item["saved"]
         btn_label = "⭐ Unsave" if is_saved else "☆ Save"
@@ -70,7 +114,7 @@ for item in data["items"]:
             rr = requests.patch(
                 f"{BASE_URL}/articles/{item['id']}/save",
                 json={"saved": (not is_saved)},
-                headers={"X-API-Key": api_key_input},
+                headers={"X-API-Key": api_key},
                 timeout=30,
             )
             if rr.ok:
